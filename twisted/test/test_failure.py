@@ -15,7 +15,9 @@ import linecache
 
 from twisted.python.compat import NativeStringIO, _PY3
 from twisted.python import _reflectpy3 as reflect
+from twisted.python.reflect import fullyQualifiedName
 from twisted.python import failure
+from twisted.internet.defer import Deferred
 
 from twisted.trial.unittest import SynchronousTestCase
 
@@ -399,6 +401,30 @@ class FailureTestCase(SynchronousTestCase):
         the stack after C{cleanFailure} has been called.
         """
         self.assertDetailedTraceback(captureVars=True, cleanFailure=True)
+
+
+    def test_printDefaultTracebackWithHistory(self):
+        """
+        If a Failure has a Deferred history, it will include the formatted
+        history items in the default traceback output.
+        """
+        d = Deferred()
+        def callback1(result):
+            return None
+        def callback2(result):
+            1 / 0
+        d.addCallback(callback1)
+        d.addCallback(callback2)
+        d.callback(None)
+        f = self.failureResultOf(d)
+        tb = f.getTraceback()
+        self.assertStartsWith(
+            tb,
+            "Failing Deferred History:\n"
+            "    [callback %s]\n"
+            "    [callback %s]\n"
+            % (fullyQualifiedName(callback1),
+                fullyQualifiedName(callback2)))
 
 
     def test_invalidFormatFramesDetail(self):
