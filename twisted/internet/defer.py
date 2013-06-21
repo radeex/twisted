@@ -650,9 +650,8 @@ class Deferred:
                         else:
                             historyItem = None
                 except:
-                    # - Including full frame information in the Failure is
-                    #   quite expensive, so we avoid it unless self.debug is
-                    #   set.
+                    # Including full frame information in the Failure is quite
+                    # expensive, so we avoid it unless self.debug is set.
                     current.result = failure.Failure(
                         captureVars=self.debug,
                         _deferredHistory=self._getHistory())
