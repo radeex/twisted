@@ -424,7 +424,61 @@ class FailureTestCase(SynchronousTestCase):
             "    [callback %s]\n"
             "    [callback %s]\n"
             % (fullyQualifiedName(callback1),
-                fullyQualifiedName(callback2)))
+               fullyQualifiedName(callback2)))
+
+
+    def test_printDefaultTracebackWithNestedHistory(self):
+        """
+        If a Failure's Deferred history has an item with a chained history,
+        that chained history will me rendered along with its parent.
+        """
+        outer = Deferred()
+        inner = Deferred()
+        def callback1(result):
+            return inner
+        def innerCallback(result):
+            return None
+        def callback2(result):
+            1 / 0
+        outer.addCallback(callback1)
+        outer.addCallback(callback2)
+        inner.addCallback(innerCallback)
+        outer.callback(None)
+        inner.callback(None)
+        f = self.failureResultOf(outer)
+        tb = f.getTraceback()
+        self.assertStartsWith(
+            tb,
+            "Failing Deferred History:\n"
+            "    [callback %s ->\n"
+            "        [callback %s]]\n"
+            "    [callback %s]\n"
+            % (fullyQualifiedName(callback1),
+               fullyQualifiedName(innerCallback),
+               fullyQualifiedName(callback2)))
+
+    def test_badHistoryRenameMe(self):
+        outer = Deferred()
+        inner = Deferred()
+        def callback1(result):
+            return inner
+        def innerCallback(result):
+            1 / 0
+        outer.addCallback(callback1)
+        inner.addCallback(innerCallback)
+        outer.callback(None)
+        inner.callback(None)
+        f = self.failureResultOf(outer)
+        tb = f.getTraceback()
+        # only inner's history is being included in the failure. that's a problem.
+        self.assertStartsWith(
+            tb,
+            "Failing Deferred History:\n"
+            "    [callback %s ->\n"
+            "        [callback %s]]\n"
+            % (fullyQualifiedName(callback1),
+               fullyQualifiedName(innerCallback)))
+
 
 
     def test_invalidFormatFramesDetail(self):

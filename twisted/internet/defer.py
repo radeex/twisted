@@ -654,7 +654,7 @@ class Deferred:
                     # expensive, so we avoid it unless self.debug is set.
                     current.result = failure.Failure(
                         captureVars=self.debug,
-                        _deferredHistory=self._getHistory())
+                        _deferredHistory=current._getHistory())
                 else:
                     if isinstance(current.result, Deferred):
                         if current._history is not None:
@@ -801,20 +801,6 @@ class _DeferredHistoryItem(object):
             for item in deferred._getHistory():
                 self.chainedHistory.add(item)
             deferred._history = self.chainedHistory
-
-
-    def format(self, indentation=0):
-        line = "{indentation}[{tag} {name}".format(
-            indentation=" " * indentation,
-            tag="callback" if self.isCallback else "errback",
-            name=self.name)
-        if self.chainedHistory:
-            line += " ->"
-            for item in self.chainedHistory.get():
-                line += "\n"
-                line += item.format(indentation=indentation + 4)
-        line += "]"
-        return line
 
 
 

@@ -568,7 +568,7 @@ class Failure:
         if self._deferredHistory:
             w('Failing Deferred History:\n')
             for item in self._deferredHistory:
-                w(item.format(indentation=4) + "\n")
+                w(self._formatHistory(item, indentation=4) + "\n")
         # Preamble
         if detail == 'verbose':
             w( '*--- Failure #%d%s---\n' %
@@ -608,6 +608,20 @@ class Failure:
             self.value.printTraceback(file, elideFrameworkCode, detail)
         if detail == 'verbose':
             w('*--- End of Failure #%d ---\n' % self.count)
+
+
+    def _formatHistory(self, item, indentation=0):
+        line = "{indentation}[{tag} {name}".format(
+            indentation=" " * indentation,
+            tag="callback" if item.isCallback else "errback",
+            name=item.name)
+        if item.chainedHistory:
+            line += " ->"
+            for item in item.chainedHistory.get():
+                line += "\n"
+                line += self._formatHistory(item, indentation=indentation + 4)
+        line += "]"
+        return line
 
 
     def printBriefTraceback(self, file=None, elideFrameworkCode=0):
