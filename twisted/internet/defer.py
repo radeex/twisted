@@ -615,6 +615,8 @@ class Deferred:
             while current.callbacks:
                 item = current.callbacks.pop(0)
                 isErrback = isinstance(current.result, failure.Failure)
+                if isErrback:
+                    current.result._deferredHistory = self._getHistory()
                 callback, args, kw = item[isErrback]
                 args = args or ()
                 kw = kw or {}

@@ -457,7 +457,12 @@ class FailureTestCase(SynchronousTestCase):
                fullyQualifiedName(innerCallback),
                fullyQualifiedName(callback2)))
 
-    def test_badHistoryRenameMe(self):
+    def test_outerHistoryWithInnerFailureShowsOuterCallbacks(self):
+        """
+        When a Deferred has a callback that returns a Deferred which fails,
+        the failure will ultimately include the history of the outer Deferred,
+        since the Failure will traverse the outer Deferred.
+        """
         outer = Deferred()
         inner = Deferred()
         def callback1(result):
@@ -479,6 +484,28 @@ class FailureTestCase(SynchronousTestCase):
             % (fullyQualifiedName(callback1),
                fullyQualifiedName(innerCallback)))
 
+
+    def test_injectHistoryIntoReturnedFailure(self):
+        """
+        Failures that are returned from a callback will have the Deferred
+        history injected into them.
+        """
+        outer = Deferred()
+        
+        def callback(result):
+            return failure.Failure(ZeroDivisionError("hello"))
+
+        outer.addCallback(callback)
+        outer.callback(None)
+
+        f = self.failureResultOf(outer)
+        tb = f.getTraceback()
+        f.trap(ZeroDivisionError)
+        self.assertStartsWith(
+            tb,
+            "Failing Deferred History:\n"
+            "    [callback %s]\n"
+            % (fullyQualifiedName(callback)))
 
 
     def test_invalidFormatFramesDetail(self):
