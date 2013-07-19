@@ -427,6 +427,26 @@ class FailureTestCase(SynchronousTestCase):
                fullyQualifiedName(callback2)))
 
 
+    def test_formatErrbackHistory(self):
+        """
+        Errbacks in history are explicitly indicated as such.
+        """
+        d = Deferred()
+        
+        def errback(failure):
+            return failure
+
+        d.addErrback(errback)
+        d.errback(failure.Failure(Exception("Boo")))
+        f = self.failureResultOf(d)
+        tb = f.getTraceback()
+        self.assertStartsWith(
+            tb,
+            "Failing Deferred History:\n"
+            "    [errback %s]"
+            % (fullyQualifiedName(errback),))
+
+
     def test_printDefaultTracebackWithNestedHistory(self):
         """
         If a Failure's Deferred history has an item with a chained history,
