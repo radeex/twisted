@@ -2393,6 +2393,7 @@ class DeferredHistoryTests(unittest.TestCase):
         self.assertEqual(chained1.name,
                          "twisted.test.test_defer.inner2Callback")
 
+
     def test_historyItemsHaveNoChainedHistoryBeforeNecessary(self):
         """
         If the callback associated with a deferred history item does not
@@ -2408,80 +2409,6 @@ class DeferredHistoryTests(unittest.TestCase):
 
         [item] = outer._getHistory()
         self.assertIdentical(item.chainedHistory, None)
-
-
-    # def test_formatSingleItem(self):
-    #     """
-    #     A deferred history item can produce a simple string format of its data.
-    #     """
-    #     outer = defer.Deferred()
-    #     def callback(result):
-    #         return None
-    #     outer.addCallback(callback)
-    #     outer.callback(None)
-    #     [item] = outer._getHistory()
-    #     self.assertEqual(
-    #         item.format(),
-    #         "[callback %s]" % (fullyQualifiedName(callback,)))
-
-
-    # def test_formatErrback(self):
-    #     """
-    #     If a history item represents an errback, then the line item indicates
-    #     such.
-    #     """
-    #     outer = defer.Deferred()
-    #     def errback(result):
-    #         return None
-    #     outer.addErrback(errback)
-    #     outer.errback(failure.Failure(Exception("omg")))
-    #     [item] = outer._getHistory()
-    #     self.assertEqual(
-    #         item.format(),
-    #         "[errback %s]" % (fullyQualifiedName(errback,)))
-
-
-    # def test_formatIndentation(self):
-    #     """
-    #     An indentation level can be specified to the formatting function.
-    #     """
-    #     outer = defer.Deferred()
-    #     def callback(result):
-    #         return None
-    #     outer.addCallback(callback)
-    #     outer.callback(None)
-    #     [item] = outer._getHistory()
-    #     self.assertEqual(
-    #         item.format(indentation=4),
-    #         "    [callback %s]" % (fullyQualifiedName(callback,)))
-
-
-    # def test_formatChainedHistory(self):
-    #     """
-    #     An item's chained history is formatted along with the item.
-    #     """
-    #     outer = defer.Deferred()
-    #     inner = defer.Deferred()
-    #     def callback(result):
-    #         return inner
-    #     def innerCallback(result):
-    #         return None
-    #     def innerCallback2(result):
-    #         return None
-    #     outer.addCallback(callback)
-    #     inner.addCallback(innerCallback)
-    #     inner.addCallback(innerCallback2)
-    #     outer.callback(None)
-    #     inner.callback(None)
-    #     [item] = outer._getHistory()
-    #     self.assertEqual(
-    #         item.format(indentation=4),
-    #         "    [callback %s ->\n"
-    #         "        [callback %s]\n"
-    #         "        [callback %s]]"
-    #          % (fullyQualifiedName(callback,),
-    #             fullyQualifiedName(innerCallback),
-    #             fullyQualifiedName(innerCallback2)))
 
 
     def test_historyInNewFailure(self):
@@ -2501,8 +2428,6 @@ class DeferredHistoryTests(unittest.TestCase):
         [item] = failure._deferredHistory
         self.assertEqual(item.name, fullyQualifiedName(callback))
 
-    # XXX test_historyInExistingFailure - when a Failure is returned from a
-    # callback / errback.
 
 
 # Enable on Python 3 as part of #5960:
